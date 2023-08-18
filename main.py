@@ -39,6 +39,12 @@ class Ship:
     def draw(self, window):
         window.blit(self.ship_img, (self.x, self.y))   
 
+    def get_width(self):
+        return self.ship_img.get_width()
+    
+    def get_height(self):
+        return self.ship_img.get_height()
+
 
 class Player(Ship):
     def __init__(self, x, y, health=100):
@@ -48,13 +54,32 @@ class Player(Ship):
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.max_health = health
 
-  
+
+class Enemy(Ship):
+    COLOR_MAP = { 
+                "red": (RED_SPACE_SHIP, RED_LASER),
+                "green": (GREEN_SPACE_SHIP, RED_LASER),
+                "blue": (BLUE_SPACE_SHIP, BLUE_LASER)
+                }
+
+    def __init__(self, x, y, color, health=100):
+        super().__init__(x, y, health)
+        self.ship_img, self.laser_img = self.COLOR_MAP[color]
+        self.mask = pygame.mask.from_surface(self.ship_img)
+    
+    def move(self, vel):
+        self.y += vel
+
 def main():
     run = True
     FPS = 60
-    level = 1
+    level = 0
     lives = 3
     main_font = pygame.font.SysFont("Impact", 40)
+
+    enemies = []
+    wave_length = 5
+    enemy_vel = 1
 
     player_vel = 5
 
@@ -71,14 +96,23 @@ def main():
         WIN.blit(lives_label, (10, 10))
         WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
 
+        for enemy in enemies:
+            enemy.draw(WIN)
+
         player.draw(WIN)
 
         pygame.display.update()
         
     while run:
         clock.tick(FPS)
-        redraw_window()
-        
+
+        if len(enemies) == 0:
+            level += 1
+            wave_length += 3
+            for i in range(wave_length):
+                enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(-1550, -100), random.choice(["red", "blue", "green"]))
+                enemies.append(enemy)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -86,11 +120,16 @@ def main():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player.x - player_vel > 0: # left
             player.x -= player_vel
-        if keys[pygame.K_RIGHT] and player.x + player_vel + 50 < WIDTH: # right
+        if keys[pygame.K_RIGHT] and player.x + player_vel + player.get_width() < WIDTH: # right
             player.x += player_vel
         if keys[pygame.K_UP] and player.y - player_vel > 0: # up
             player.y -= player_vel
-        if keys[pygame.K_DOWN] and player.y + player_vel + 50 < HEIGHT: # down
+        if keys[pygame.K_DOWN] and player.y + player_vel + player.get_height() < HEIGHT: # down
             player.y += player_vel
+
+        for enemy in enemies:
+            enemy.move(enemy_vel)
+        
+        redraw_window()
 
 main()
