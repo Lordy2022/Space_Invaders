@@ -108,7 +108,8 @@ class Player(Ship):
                 for obj in objs:
                     if laser.collision(obj):
                       objs.remove(obj)
-                      self.lasers.remove(laser)
+                      if laser in self.lasers:
+                        self.lasers.remove(laser)
 
     def healthbar(self, window):
         pygame.draw.rect(window, (255,0,0), (self.x, self.y + self.ship_img.get_height() + 10, self.ship_img.get_width(), 10))
@@ -210,7 +211,7 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+                quit()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and player.x - player_vel > 0: # left
@@ -239,8 +240,22 @@ def main():
                 lives -= 1
                 enemies.remove(enemy)
             
-        
         player.move_lasers(-laser_vel, enemies)
         
+def main_menu():
+    title_font = pygame.font.SysFont("Impact", 50)
+    run = True
+    while run:
+        WIN.blit(BG, (0,0))
+        title_label = title_font.render("Press the mouse to begin...", 1, (255,255,255))
+        WIN.blit(title_label, (WIDTH/2 - title_label.get_width()/2, 350))
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONUP:
+                main()
+    pygame.quit()
 
-main()
+
+main_menu()
