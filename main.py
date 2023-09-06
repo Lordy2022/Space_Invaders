@@ -125,6 +125,12 @@ class Enemy(Ship):
     def move(self, vel):
         self.y += vel
 
+    def shoot(self):
+        if self.cool_down_counter == 0:
+            laser = Laser(self.x-20, self.y, self.laser_img)
+            self.lasers.append(laser)
+            self.cool_down_counter = 1
+
 def collide(obj1, obj2):
     offset_x = obj2.x - obj1.x
     offset_y = obj2.y - obj1.y
@@ -213,10 +219,10 @@ def main():
 
         for enemy in enemies[:]:
             enemy.move(enemy_vel)
-            enemy.move_lasers(enemy_vel, player)
+            enemy.move_lasers(laser_vel, player)
 
-            if random.randrange(0, 2*60) == 1:
-
+            if random.randrange(0, 16*60) == 1:
+                enemy.shoot()
 
             if enemy.y + enemy.get_height() > HEIGHT:
                 lives -= 1
